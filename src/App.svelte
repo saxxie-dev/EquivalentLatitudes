@@ -70,7 +70,7 @@
 	const mapRect=e.target.getBoundingClientRect();
 	focusX=(e.clientX-mapRect.x) 
 	focusY=(e.clientY-mapRect.y) }}>
-	<img src="/north-america-equirectangular.svg"/>
+	<img src="https://saxxie.dev/EquivalentLatitudes/north-america-equirectangular.svg"/>
 
 	<div class="crosshairX" style={`top: ${focusY}px`}/>
 	<div class="crosshairY" style={`left: ${focusX}px`}/>
