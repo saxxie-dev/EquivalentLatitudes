@@ -9,24 +9,29 @@
   .city {
 		position: absolute;
 		transform: translate(-4px, -4px);
-		pointer-events: none;
     display: flex;
     flex-direction: row;
 	}
+
   .point {
     height: 10px;
     width: 10px;
     border-radius: 50%;
     background-color: #e56204;
     border: 2px solid #595959;
+    cursor: default;
   }
+
   .label {
-    /*background-color: rgba(229,98,4, 0.7);*/
     font-size: 12px;
     padding: 3px;
     padding-top: 1px;
     border-radius: 8px;
     color: #b9b8b9;
+  }
+
+  .point:hover {
+    box-shadow: 0px 0px 5px 4px #e56204;
   }
 </style>
 
