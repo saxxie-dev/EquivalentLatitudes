@@ -7,6 +7,7 @@ body {
 
 body {
 	background-color: #10110e;
+	touch-action: none;
 	margin: 0;
 	padding: 0;
 	box-sizing: border-box;
