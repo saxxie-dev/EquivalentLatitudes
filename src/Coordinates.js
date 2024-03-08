@@ -1,5 +1,3 @@
-
-
 const topReferenceYr = 0.160875;
 const topReferenceLatitude = 71.29;
 const bottomReferenceYr = 0.983905;

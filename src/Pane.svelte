@@ -17,6 +17,7 @@
     offset.set(normalizePosition({x: $offset.x, y: $offset.y}, zoom));
   };
 
+  let touchStart = undefined;
 
   const mapHeight = (zoom) => 500 * zoom;
   
@@ -68,7 +69,14 @@
 </style>
 <svelte:window bind:innerHeight={screenH} bind:innerWidth={screenW}/>
 <div
-  on:mousedown={(e) => { dragStart = {x: e.screenX, y: e.screenY, ox: $offset.x, oy: $offset.y}; }}
+  on:mousedown={(e) => {
+    dragStart = {
+      x: e.screenX,
+      y: e.screenY,
+      ox: $offset.x,
+      oy: $offset.y,
+    };
+  }}
   on:mouseup={onDragStop}
   on:mouseleave={onDragStop}
   on:mousemove={(e) => { 
@@ -87,7 +95,31 @@
       x: e.clientX / screenW * (1 - multiplier)  + multiplier * $offset.x,
       y: e.clientY / screenH * (1 - multiplier) + multiplier * $offset.y,
     }, zoom), {hard: true});
-  }}>
+  }}
+  on:touchstart={(e) => {
+    const t0 = e.touches[0];
+    const t1 = e.touches[1] ?? e.touches[0];
+    const tx = (t0.screenX + t1.screenX) / 2;
+    const ty = (t0.screenY + t1.screenY) / 2;
+    dragStart = {
+      x: tx,
+      y: ty,
+      ox: $offset.x,
+      oy: $offset.y,
+    };
+  }}
+  on:touchmove={(e) => {
+    const t0 = e.touches[0];
+    const t1 = e.touches[1] ?? e.touches[0];
+    const tx = (t0.screenX + t1.screenX) / 2;
+    const ty = (t0.screenY + t1.screenY) / 2;
+    offset.set({
+        x: dragStart.ox - (dragStart.x - tx)/(screenW),
+        y: dragStart.oy - (dragStart.y - ty)/(screenH),
+      });
+  }}
+  on:touchend={onDragStop}
+  >
   <div 
     style={`
       transform: translate(${$offset.x * screenW}px, ${$offset.y * screenH}px);
