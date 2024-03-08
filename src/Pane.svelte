@@ -131,7 +131,7 @@
         on:load={(e) => { mapRatio = e.target.width / e.target.height; } }
         draggable="false"
         style="height: 100%;"
-        src="https://saxxie.dev/EquivalentLatitudes/north-america-equirectangular.svg"/>
+        src="/north-america-equirectangular.svg"/>
       {#each Object.keys(cityToCoords) as cityName}
 		    <CityMark cityName={cityName} />
 	    {/each}
