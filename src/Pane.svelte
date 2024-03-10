@@ -11,13 +11,12 @@
     { stiffness: 0.2, damping: 0.4});
   
   let mapRatio;
+  let initialTouchDistance
 
   const onDragStop = () => { 
     dragStart = undefined; 
     offset.set(normalizePosition({x: $offset.x, y: $offset.y}, zoom));
   };
-
-  let touchStart = undefined;
 
   const mapHeight = (zoom) => 500 * zoom;
   
@@ -92,13 +91,20 @@
     zoom *= multiplier;
     offset.set(
       normalizePosition({
-      x: e.clientX / screenW * (1 - multiplier)  + multiplier * $offset.x,
-      y: e.clientY / screenH * (1 - multiplier) + multiplier * $offset.y,
+      x: e.screenX / screenW * (1 - multiplier)  + multiplier * $offset.x,
+      y: e.screenY / screenH * (1 - multiplier) + multiplier * $offset.y,
     }, zoom), {hard: true});
   }}
   on:touchstart={(e) => {
     const t0 = e.touches[0];
     const t1 = e.touches[1] ?? e.touches[0];
+
+    if (e.touches.length >= 2) {
+      const dx = t0.screenX - t1.screenX;
+      const dy = t0.screenY - t1.screenY;
+      initialTouchDistance = Math.sqrt(dx * dx + dy * dy);
+    }
+  
     const tx = (t0.screenX + t1.screenX) / 2;
     const ty = (t0.screenY + t1.screenY) / 2;
     dragStart = {
@@ -109,14 +115,38 @@
     };
   }}
   on:touchmove={(e) => {
+    e.preventDefault();
     const t0 = e.touches[0];
     const t1 = e.touches[1] ?? e.touches[0];
     const tx = (t0.screenX + t1.screenX) / 2;
     const ty = (t0.screenY + t1.screenY) / 2;
-    offset.set({
+    if(e.touches.length >= 2 && initialTouchDistance) {
+      const dx = t0.screenX - t1.screenX;
+      const dy = t0.screenY - t1.screenY;
+      const currentTouchDistance = Math.sqrt(dx * dx + dy * dy);
+      const zoomRatio = currentTouchDistance / initialTouchDistance;
+      zoom *= zoomRatio;
+      initialTouchDistance = currentTouchDistance;
+
+      // Update offset to keep the zoom centered
+      const centerX = tx / screenW;
+      const centerY = ty / screenH;
+      offset.set(
+        normalizePosition(
+          {
+            x: centerX * (1 - zoomRatio) + zoomRatio * $offset.x,
+            y: centerY * (1 - zoomRatio) + zoomRatio * $offset.y,
+          },
+          zoom
+        ),
+        { hard: true }
+      );
+    } else {
+      offset.set({
         x: dragStart.ox - (dragStart.x - tx)/(screenW),
         y: dragStart.oy - (dragStart.y - ty)/(screenH),
       });
+    }
   }}
   on:touchend={onDragStop}
   >
