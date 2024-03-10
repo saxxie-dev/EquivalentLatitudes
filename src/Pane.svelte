@@ -15,6 +15,7 @@
 
   const onDragStop = () => { 
     dragStart = undefined; 
+    const initialTouchDistance = undefined;
     offset.set(normalizePosition({x: $offset.x, y: $offset.y}, zoom));
   };
 
