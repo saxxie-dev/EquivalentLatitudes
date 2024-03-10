@@ -163,6 +163,55 @@
         draggable="false"
         style="height: 100%;"
         src="/north-america-equirectangular.svg"/>
+      <div
+        id="arctic"
+        style={`position: absolute;
+          top: ${latToYr(66.5)*100}%;
+          left: -500%; width: 1000%;
+          height: 100%; transform: translateY(-100%);
+          border-bottom: 1px solid white;
+          background:  repeating-linear-gradient(
+            -45deg,
+            transparent,
+            transparent ${5 * Math.sqrt(zoom)}px,
+            #595959 ${5 * Math.sqrt(zoom)}px,
+            #595959 ${8 * Math.sqrt(zoom)}px
+          );
+          opacity: 0.3;
+          mix-blend-mode: plus-lighter;
+          vertical-align: bottom;`}
+      />
+      <span style={`position: absolute; 
+        left: ${-$offset.x * screenW + 6}px;
+        top: ${latToYr(66.5)*100}%;
+        color: #aaa;
+        text-shadow: #595959 0px 0px 3px;
+        font-size: 11px;`}>Arctic</span>
+      <div
+        id="tropic"
+        style={`position: absolute;
+          top: ${latToYr(23.5)*100}%;
+          left: -500%; width: 1000%;
+          height: 100%;
+          border-top: 1px solid white;
+          background:  repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent ${5 * Math.sqrt(zoom)}px,
+            #595959 ${5 * Math.sqrt(zoom)}px,
+            #595959 ${8 * Math.sqrt(zoom)}px
+          );
+          opacity: 0.3;
+          mix-blend-mode: multiply;
+          vertical-align: bottom;`}
+      />
+      <span style={`position: absolute; 
+        left: ${-$offset.x * screenW + 6}px;
+        top: ${latToYr(23.5)*100}%;
+        transform: translateY(-100%);
+        color: #aaa;
+        text-shadow: #595959 0px 0px 3px;
+        font-size: 11px;`}>Tropic</span>
       {#each Object.keys(cityToCoords) as cityName}
 		    <CityMark cityName={cityName} />
 	    {/each}
