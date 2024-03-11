@@ -37,7 +37,7 @@
 
 <div class="city" style={
   `top: ${latToYr(cityToCoords[cityName][0])*100}%;
-  left: ${longToXr(cityToCoords[cityName][1])*100}%
+  left: ${longToXr(cityToCoords[cityName][1])*100}%;
 `}>
   <div class="point"/>
   <div class="label">{cityName}</div>

@@ -55,20 +55,50 @@
 
 </script>
 <style>
-  div {
+  .pane {
     position: absolute;
-    top: 0px;
-    left: 0px;
-    bottom: 0px;
-    right: 0px;
-    color: white;
+    inset: 0;
     overflow: hidden;
     user-select: none;
     cursor: grab;
   }
+
+  .mapContainer {
+    width: max-content;
+    overflow: visible;
+  }
+
+  .arctic {
+    position: absolute;
+    left: -500%;
+    width: 1000%;
+    height: 300%;
+    transform: translateY(-100%);
+    border-bottom: 1px solid white;
+    opacity: 0.3;
+    mix-blend-mode: plus-lighter;
+  }
+
+  .tropic {
+    position: absolute;
+    left: -500%;
+    width: 1000%;
+    height: 300%;
+    border-top: 1px solid white;
+    opacity: 0.3;
+    mix-blend-mode: multiply;
+  }
+
+  .zoneLabel {
+    position: absolute;
+    color: #aaa;
+    text-shadow: #595959 0px 0px 3px;
+    font-size: 11px;
+  }
 </style>
 <svelte:window bind:innerHeight={screenH} bind:innerWidth={screenW}/>
 <div
+  class="pane"
   on:mousedown={(e) => {
     dragStart = {
       x: e.screenX,
@@ -152,66 +182,56 @@
   on:touchend={onDragStop}
   >
   <div 
+    class="mapContainer"
     style={`
       transform: translate(${$offset.x * screenW}px, ${$offset.y * screenH}px);
       height:${mapHeight(zoom)}px;
-      width: max-content;
-      overflow: visible;
-    `} >
+    `}>
       <img 
-        on:load={(e) => { mapRatio = e.target.width / e.target.height; } }
+        on:load={(e) => {
+          mapRatio = e.target.width / e.target.height;
+          onDragStop();
+        } }
         draggable="false"
         style="height: 100%;"
         src="/north-america-equirectangular.svg"/>
       <div
-        id="arctic"
-        style={`position: absolute;
+        class="arctic"
+        style={`
           top: ${latToYr(66.5)*100}%;
-          left: -500%; width: 1000%;
-          height: 100%; transform: translateY(-100%);
-          border-bottom: 1px solid white;
           background:  repeating-linear-gradient(
             -45deg,
             transparent,
             transparent ${5 * Math.sqrt(zoom)}px,
             #595959 ${5 * Math.sqrt(zoom)}px,
             #595959 ${8 * Math.sqrt(zoom)}px
-          );
-          opacity: 0.3;
-          mix-blend-mode: plus-lighter;
-          vertical-align: bottom;`}
+          );`}
       />
-      <span style={`position: absolute; 
-        left: ${-$offset.x * screenW + 6}px;
-        top: ${latToYr(66.5)*100}%;
-        color: #aaa;
-        text-shadow: #595959 0px 0px 3px;
-        font-size: 11px;`}>Arctic</span>
+      <span 
+        class="zoneLabel"
+          style={`left: ${-$offset.x * screenW + 6}px;
+        top: ${latToYr(66.5)*100}%;`}>
+          Arctic
+      </span>
       <div
-        id="tropic"
-        style={`position: absolute;
+        class="tropic"
+        style={`
           top: ${latToYr(23.5)*100}%;
-          left: -500%; width: 1000%;
-          height: 100%;
-          border-top: 1px solid white;
           background:  repeating-linear-gradient(
             45deg,
             transparent,
             transparent ${5 * Math.sqrt(zoom)}px,
             #595959 ${5 * Math.sqrt(zoom)}px,
             #595959 ${8 * Math.sqrt(zoom)}px
-          );
-          opacity: 0.3;
-          mix-blend-mode: multiply;
-          vertical-align: bottom;`}
+          );`}
       />
-      <span style={`position: absolute; 
-        left: ${-$offset.x * screenW + 6}px;
-        top: ${latToYr(23.5)*100}%;
-        transform: translateY(-100%);
-        color: #aaa;
-        text-shadow: #595959 0px 0px 3px;
-        font-size: 11px;`}>Tropic</span>
+      <span 
+        class="zoneLabel"
+        style={`left: ${-$offset.x * screenW + 6}px;
+          top: ${latToYr(23.5)*100}%;
+          transform: translateY(-100%);`}>
+            Tropic
+      </span>
       {#each Object.keys(cityToCoords) as cityName}
 		    <CityMark cityName={cityName} />
 	    {/each}
