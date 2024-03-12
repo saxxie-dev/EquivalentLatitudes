@@ -7,15 +7,25 @@
   let screenH, screenW;
   let zoom = 1;
   let dragStart = undefined;
+  let dragMoved = false;
+
   let offset = spring({x: 0, y: 0}, 
     { stiffness: 0.2, damping: 0.4});
   
   let mapRatio;
-  let initialTouchDistance
+  let initialTouchDistance;
+
+  let referenceLatitude = undefined;
+  let referenceCity = undefined;
 
   const onDragStop = () => { 
     dragStart = undefined; 
-    const initialTouchDistance = undefined;
+    initialTouchDistance = undefined;
+    if(dragMoved) {
+      dragMoved = false;
+    } else {
+      deselect();
+    }
     offset.set(normalizePosition({x: $offset.x, y: $offset.y}, zoom));
   };
 
@@ -51,6 +61,11 @@
     };
   };
 
+  const deselect = () => {
+    if(dragStart !== undefined) { return; }
+    referenceLatitude = undefined;
+    referenceCity = undefined;
+  };
   
 
 </script>
@@ -60,7 +75,11 @@
     inset: 0;
     overflow: hidden;
     user-select: none;
-    cursor: grab;
+    cursor: default;
+  }
+
+  .pane:global(.dragging) {
+    cursor: move;
   }
 
   .mapContainer {
@@ -74,7 +93,7 @@
     width: 1000%;
     height: 300%;
     transform: translateY(-100%);
-    border-bottom: 1px solid white;
+    border-bottom: 1px solid #696969;
     opacity: 0.3;
     mix-blend-mode: plus-lighter;
   }
@@ -84,7 +103,7 @@
     left: -500%;
     width: 1000%;
     height: 300%;
-    border-top: 1px solid white;
+    border-top: 1px solid #696969;
     opacity: 0.3;
     mix-blend-mode: multiply;
   }
@@ -95,10 +114,20 @@
     text-shadow: #595959 0px 0px 3px;
     font-size: 11px;
   }
+
+  .reference {
+    position: absolute;
+    width: 1000%;
+    left: -500%;
+    height: 0px;
+    background-color: #e56204;
+    box-shadow: 0px 0px 3px 0.5px #e56204;
+    z-index: 1; /*Otherwise causes blurring on mobile, inexpliciably*/
+  }
 </style>
 <svelte:window bind:innerHeight={screenH} bind:innerWidth={screenW}/>
 <div
-  class="pane"
+  class={`pane${dragStart === undefined ? "" : " dragging"}`}
   on:mousedown={(e) => {
     dragStart = {
       x: e.screenX,
@@ -110,7 +139,8 @@
   on:mouseup={onDragStop}
   on:mouseleave={onDragStop}
   on:mousemove={(e) => { 
-    if(dragStart) {      
+    if(dragStart) {
+      dragMoved = true;      
       offset.set({
         x: dragStart.ox - (dragStart.x - e.screenX)/(screenW),
         y: dragStart.oy - (dragStart.y - e.screenY)/(screenH),
@@ -151,6 +181,7 @@
     const t1 = e.touches[1] ?? e.touches[0];
     const tx = (t0.screenX + t1.screenX) / 2;
     const ty = (t0.screenY + t1.screenY) / 2;
+    dragMoved = true;
     if(e.touches.length >= 2 && initialTouchDistance) {
       const dx = t0.screenX - t1.screenX;
       const dy = t0.screenY - t1.screenY;
@@ -195,6 +226,9 @@
         draggable="false"
         style="height: 100%;"
         src="/north-america-equirectangular.svg"/>
+      <div class="reference" style={`
+        top: ${latToYr(referenceLatitude) * 100}%;
+        display: ${referenceLatitude === undefined ? "none" : "block"};`}/>
       <div
         class="arctic"
         style={`
@@ -233,7 +267,13 @@
             Tropic
       </span>
       {#each Object.keys(cityToCoords) as cityName}
-		    <CityMark cityName={cityName} />
+		    <CityMark 
+          cityName={cityName}
+          selectedCity={referenceCity}
+          on:select={(e) => {
+            referenceLatitude = e.detail.latitude;
+            referenceCity = e.detail.name;
+          }}/>
 	    {/each}
   </div>
 </div>
