@@ -7,7 +7,7 @@
   let screenH, screenW;
   let zoom = 1;
   let dragStart = undefined;
-  let dragMoved = false;
+  let dragMoved = true;
 
   let offset = spring({x: 0, y: 0}, 
     { stiffness: 0.2, damping: 0.4});
@@ -17,17 +17,6 @@
 
   let referenceLatitude = undefined;
   let referenceCity = undefined;
-
-  const onDragStop = () => { 
-    dragStart = undefined; 
-    initialTouchDistance = undefined;
-    if(dragMoved) {
-      dragMoved = false;
-    } else {
-      deselect();
-    }
-    offset.set(normalizePosition({x: $offset.x, y: $offset.y}, zoom));
-  };
 
   const mapHeight = (zoom) => 500 * zoom;
   
@@ -61,12 +50,28 @@
     };
   };
 
+  const normalizeCurrentPosition = () => {
+    offset.set(normalizePosition({x: $offset.x, y: $offset.y}, zoom));
+  }
+
   const deselect = () => {
-    if(dragStart !== undefined) { return; }
     referenceLatitude = undefined;
     referenceCity = undefined;
   };
-  
+
+  const onDragStop = () => { 
+    dragStart = undefined; 
+    initialTouchDistance = undefined;
+    dragMoved = false;
+    normalizeCurrentPosition();
+  };
+
+  const onCurseStop = () => {
+    if(!dragMoved) {
+      deselect();
+    }
+    onDragStop();
+  };
 
 </script>
 <style>
@@ -136,7 +141,7 @@
       oy: $offset.y,
     };
   }}
-  on:mouseup={onDragStop}
+  on:mouseup={onCurseStop}
   on:mouseleave={onDragStop}
   on:mousemove={(e) => { 
     if(dragStart) {
@@ -147,7 +152,7 @@
       });
     }
   }}
-  on:wheel={(e) => {
+  on:wheel|passive={(e) => {
     const multiplier = Math.exp(e.wheelDeltaY / 500);
     zoom *= multiplier;
     offset.set(
@@ -176,7 +181,6 @@
     };
   }}
   on:touchmove={(e) => {
-    e.preventDefault();
     const t0 = e.touches[0];
     const t1 = e.touches[1] ?? e.touches[0];
     const tx = (t0.screenX + t1.screenX) / 2;
@@ -210,7 +214,7 @@
       });
     }
   }}
-  on:touchend={onDragStop}
+  on:touchend={onCurseStop}
   >
   <div 
     class="mapContainer"
@@ -269,7 +273,8 @@
       {#each Object.keys(cityToCoords) as cityName}
 		    <CityMark 
           cityName={cityName}
-          selectedCity={referenceCity}
+          selected={referenceCity === cityName}
+          dragging={dragMoved}
           on:select={(e) => {
             referenceLatitude = e.detail.latitude;
             referenceCity = e.detail.name;

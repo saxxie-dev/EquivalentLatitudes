@@ -5,9 +5,17 @@
 
 	const dispatch = createEventDispatcher();
   export let cityName;
-  export let selectedCity;
+  export let selected;
+  export let dragging;
   const onSelect = () => {
     dispatch("select", { latitude: cityToCoords[cityName][0], name: cityName });
+  }
+
+  const followLink = () => {
+    console.log(selected, dragging)
+    if (selected && !dragging){
+      window.open(`https://wikipedia.org/wiki/${cityName}`, "_self");
+    }
   }
 </script>
 <style> 
@@ -72,18 +80,14 @@
 </style>
 
 <div 
-  class={`city${selectedCity === cityName ? " selected" : ""}`} 
+  class={`city${selected ? " selected" : ""}`}
+  on:touchend={followLink}
   style={`
     top: ${latToYr(cityToCoords[cityName][0])*100}%;
     left: ${longToXr(cityToCoords[cityName][1])*100}%;`}>
     <div class="point" 
-      on:click={(e) => {
-        if (selectedCity === cityName){
-          window.open(`https://wikipedia.org/wiki/${cityName}`);
-        } else {
-          onSelect();
-        }
-        e.stopPropagation();
-        }}/>
+      on:click={onSelect}
+      on:mouseup={followLink}
+      />
     <a class="label" href={`https://wikipedia.org/wiki/${cityName}`}>{cityName}</a>
 </div>
